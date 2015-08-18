@@ -27,7 +27,7 @@ HVID-X230     ::1             10.165.169.86    fe80::8050:8aa2:3b6d:44af%16     
 .FUNCTIONALITY
    The functionality that best describes this cmdlet
 #>
-function Start-MultiThred
+function Start-Multithread
 {
     [CmdletBinding(DefaultParameterSetName='Parameter Set 1', 
                   SupportsShouldProcess=$true, 
