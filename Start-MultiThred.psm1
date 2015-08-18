@@ -54,17 +54,20 @@ function Start-MultiThred
         [int]
         $MaxThreads = 20 ,
 
+        # Number of sec to wait after last thred is started. 
         [Parameter(Mandatory=$false, 
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
                    Position=3)]
-        # Number of sec to wait after last thred is started. 
         [int]
         $MaxWaitTime = 600,
 
         # Number of Milliseconds to wait if MaxThreads is reached
+        [Parameter(Mandatory=$false, 
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true, 
+                   Position=4)]
         $SleepTime = 500
-
 
     )
 
@@ -73,33 +76,39 @@ function Start-MultiThred
     }
     Process
     {
-        if ($pscmdlet.ShouldProcess("Target", "Operation"))
+        if ($pscmdlet.ShouldProcess('Target', 'Operation'))
         {
             
             $i = 0
-            $jobs = @()
-
+            $Jobs = @()
             Foreach($Computer in $Computers) {
                 # Wait for running jobs to finnish if MaxThreads is reached
                 While((Get-Job -State Running).count -gt $MaxThreads) {
-                    Write-Progress -Activity "Computers" -Status "Waiting for existing threads to complete"
+                    Write-Progress -Activity 'Computers' -Status 'Waiting for existing threads to complete' -PercentComplete ($i / $Computers.Count * 100)
                     Start-Sleep -Milliseconds $SleepTime 
                 }
 
                 # Start new jobs 
                 $i++
-                $jobs + = Start-Job -ScriptBlock $Script -Name $Computer -OutVariable LastJob
-                Write-Progress -Activity "Computers" -Status "Starting Threads"
+                $Jobs += Start-Job -ScriptBlock $Script -Name $Computer -OutVariable LastJob
+                Write-Progress -Activity 'Computers' -Status 'Starting Threads' -PercentComplete ($i / $Computers.Count * 100)
 
             }
 
+            # All Jobs are now running
 
+
+            # Wait for jobs to finish
+            While((Get-Job -State Running).count -gt 0) {
+            
+                $JobsStillRunning = ''
+                foreach($RunningJob in (Get-Job -State Running)) {
+                    $JobsStillRunning += $RunningJob.Name
+                }
+
+                Write-Progress -Activity 'Waiting for jobs to finish' -Status "$JobsStillRunning"  -PercentComplete (($Computers.Count - (Get-Job -State Running).Count) / $Computers.Count * 100)
          
-
-
-
-
-
+            }
         }
     }
     End
