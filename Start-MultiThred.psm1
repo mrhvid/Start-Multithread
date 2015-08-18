@@ -20,7 +20,7 @@
 .FUNCTIONALITY
    The functionality that best describes this cmdlet
 #>
-function Verb-Noun
+function Start-MultiThred
 {
     [CmdletBinding(DefaultParameterSetName='Parameter Set 1', 
                   SupportsShouldProcess=$true, 
@@ -31,36 +31,37 @@ function Verb-Noun
     [OutputType([String])]
     Param
     (
-        # Param1 help description
+        # Command or script to run. Must take ComputerName as argument to make sense. 
         [Parameter(Mandatory=$true, 
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false, 
-                   Position=0,
-                   ParameterSetName='Parameter Set 1')]
-        [ValidateNotNull()]
-        [ValidateNotNullOrEmpty()]
-        [ValidateCount(0,5)]
-        [ValidateSet("sun", "moon", "earth")]
-        [Alias("p1")] 
-        $Param1,
+                   Position=0)]
+        $Script,
 
-        # Param2 help description
-        [Parameter(ParameterSetName='Parameter Set 1')]
-        [AllowNull()]
-        [AllowEmptyCollection()]
-        [AllowEmptyString()]
-        [ValidateScript({$true})]
-        [ValidateRange(0,5)]
+        # List of computers to run script against
+        [Parameter(Mandatory=$true, 
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true, 
+                   Position=1)]
+        [String[]]
+        $Computers,
+
+        # Maximum concurrent threads to start
+        [Parameter(Mandatory=$false, 
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true, 
+                   Position=2)]
         [int]
-        $Param2,
+        $MaxThreads = 20 ,
 
-        # Param3 help description
-        [Parameter(ParameterSetName='Another Parameter Set')]
-        [ValidatePattern("[a-z]*")]
-        [ValidateLength(0,15)]
-        [String]
-        $Param3
+        [Parameter(Mandatory=$false, 
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true, 
+                   Position=3)]
+        # Number of sec to wait after last thred is started. 
+        [int]
+        $MaxWaitTime = 600
+
     )
 
     Begin
