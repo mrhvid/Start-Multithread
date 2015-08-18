@@ -25,7 +25,7 @@ function Start-MultiThred
     [CmdletBinding(DefaultParameterSetName='Parameter Set 1', 
                   SupportsShouldProcess=$true, 
                   PositionalBinding=$false,
-                  HelpUri = 'http://www.microsoft.com/',
+                  HelpUri = 'https://github.com/mrhvid/Start-MultiThred/',
                   ConfirmImpact='Medium')]
     [Alias()]
     [OutputType([String])]
@@ -60,7 +60,11 @@ function Start-MultiThred
                    Position=3)]
         # Number of sec to wait after last thred is started. 
         [int]
-        $MaxWaitTime = 600
+        $MaxWaitTime = 600,
+
+        # Number of Milliseconds to wait if MaxThreads is reached
+        $SleepTime = 500
+
 
     )
 
@@ -71,6 +75,31 @@ function Start-MultiThred
     {
         if ($pscmdlet.ShouldProcess("Target", "Operation"))
         {
+            
+            $i = 0
+            $jobs = @()
+
+            Foreach($Computer in $Computers) {
+                # Wait for running jobs to finnish if MaxThreads is reached
+                While((Get-Job -State Running).count -gt $MaxThreads) {
+                    Write-Progress -Activity "Computers" -Status "Waiting for existing threads to complete"
+                    Start-Sleep -Milliseconds $SleepTime 
+                }
+
+                # Start new jobs 
+                $i++
+                $jobs + = Start-Job -ScriptBlock $Script -Name $Computer -OutVariable LastJob
+                Write-Progress -Activity "Computers" -Status "Starting Threads"
+
+            }
+
+
+         
+
+
+
+
+
         }
     }
     End
