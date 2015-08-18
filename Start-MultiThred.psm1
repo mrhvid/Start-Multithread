@@ -84,18 +84,18 @@ function Start-MultiThred
             Foreach($Computer in $Computers) {
                 # Wait for running jobs to finnish if MaxThreads is reached
                 While((Get-Job -State Running).count -gt $MaxThreads) {
-                    Write-Progress -Activity 'Computers' -Status 'Waiting for existing threads to complete' -PercentComplete ($i / $Computers.Count * 100)
+                    Write-Progress -Id 1 -Activity 'Waiting for existing jobs to complete' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $Computers.Count * 100)
                     Start-Sleep -Milliseconds $SleepTime 
                 }
 
                 # Start new jobs 
                 $i++
-                $Jobs += Start-Job -ScriptBlock $Script -Name $Computer -OutVariable LastJob
-                Write-Progress -Activity 'Computers' -Status 'Starting Threads' -PercentComplete ($i / $Computers.Count * 100)
+                $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $Computer -Name $Computer -OutVariable LastJob
+                Write-Progress -Id 1 -Activity 'Starting jobs' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $Computers.Count * 100)
 
             }
 
-            # All Jobs are now running
+            # All jobs have now been started
 
 
             # Wait for jobs to finish
@@ -106,9 +106,15 @@ function Start-MultiThred
                     $JobsStillRunning += $RunningJob.Name
                 }
 
-                Write-Progress -Activity 'Waiting for jobs to finish' -Status "$JobsStillRunning"  -PercentComplete (($Computers.Count - (Get-Job -State Running).Count) / $Computers.Count * 100)
-         
+                Write-Progress -Id 1 -Activity 'Waiting for jobs to finish' -Status "$JobsStillRunning"  -PercentComplete (($Computers.Count - (Get-Job -State Running).Count) / $Computers.Count * 100)
+                Start-Sleep -Milliseconds $SleepTime
             }
+
+            # Output
+            Get-job | Receive-Job 
+
+            # Cleanup 
+            Get-job | Remove-Job
         }
     }
     End
