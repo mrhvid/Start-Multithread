@@ -1,10 +1,17 @@
 ﻿<#
 .Synopsis
-   Short description
+   Module for Multi Treading using jobs
 .DESCRIPTION
-   Long description
+   Module for multi threading using jobs 
 .EXAMPLE
-   Example of how to use this cmdlet
+PS C:\> Start-MultiThred -Script { param($ComputerName) Test-Connection $ComputerName -Count 1} -Computers ::1,localhost,::1
+
+Source        Destination     IPV4Address      IPV6Address                              Bytes    Time(ms) 
+------        -----------     -----------      -----------                              -----    -------- 
+HVID-X230     ::1             10.165.169.86    fe80::8050:8aa2:3b6d:44af%16             32       0        
+HVID-X230     localhost       127.0.0.1        ::1                                      32       0        
+HVID-X230     ::1             10.165.169.86    fe80::8050:8aa2:3b6d:44af%16             32       0        
+
 .EXAMPLE
    Another example of how to use this cmdlet
 .INPUTS
@@ -12,7 +19,7 @@
 .OUTPUTS
    Output from this cmdlet (if any)
 .NOTES
-   General notes
+   This module was created with a powershell.org blogpost in mind
 .COMPONENT
    The component this cmdlet belongs to
 .ROLE
