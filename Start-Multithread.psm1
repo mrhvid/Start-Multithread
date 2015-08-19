@@ -32,7 +32,7 @@ function Start-Multithread
     [CmdletBinding(DefaultParameterSetName='Parameter Set 1', 
                   SupportsShouldProcess=$true, 
                   PositionalBinding=$false,
-                  HelpUri = 'https://github.com/mrhvid/Start-MultiThred/',
+                  HelpUri = 'https://github.com/mrhvid/Start-MultiThread/',
                   ConfirmImpact='Medium')]
     [Alias()]
     [OutputType([String])]
@@ -49,7 +49,8 @@ function Start-Multithread
         [Parameter(Mandatory=$true, 
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
-                   Position=1)]
+                   Position=1,
+                   Alias='ComputerName')]
         [String[]]
         $Computers,
 
@@ -88,16 +89,16 @@ function Start-Multithread
             
             $i = 0
             $Jobs = @()
-            Foreach($Computer in $Computers) {
+            Foreach($ComputerName in $Computers) {
                 # Wait for running jobs to finnish if MaxThreads is reached
-                While((Get-Job -State Running).count -gt $MaxThreads) {
+                While((Get-Job -State Running).count -ge $MaxThreads) {
                     Write-Progress -Id 1 -Activity 'Waiting for existing jobs to complete' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $Computers.Count * 100)
                     Start-Sleep -Milliseconds $SleepTime 
                 }
 
                 # Start new jobs 
                 $i++
-                $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $Computer -Name $Computer -OutVariable LastJob
+                $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $ComputerName -Name $ComputerName -OutVariable LastJob
                 Write-Progress -Id 1 -Activity 'Starting jobs' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $Computers.Count * 100)
 
             }
