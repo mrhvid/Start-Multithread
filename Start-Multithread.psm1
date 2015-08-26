@@ -50,9 +50,9 @@ function Start-Multithread
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
                    Position=1,
-                   Alias='ComputerName')]
+                   Alias='Computers')]
         [String[]]
-        $Computers,
+        $ComputerName,
 
         # Maximum concurrent threads to start
         [Parameter(Mandatory=$false, 
@@ -89,18 +89,19 @@ function Start-Multithread
             
             $i = 0
             $Jobs = @()
-            Foreach($ComputerName in $Computers) {
-                Write-Verbose "Processing $ComputerName"
+            Foreach($Computer in $ComputerName) {
+                Write-Verbose "Processing $Computer"
                 # Wait for running jobs to finnish if MaxThreads is reached
                 While((Get-Job -State Running).count -ge $MaxThreads) {
-                    Write-Progress -Id 1 -Activity 'Waiting for existing jobs to complete' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $Computers.Count * 100)
+                    Write-Progress -Id 1 -Activity 'Waiting for existing jobs to complete' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $ComputerName.Count * 100)
+                    Write-Verbose "Waiting for jobs to finish before starting new ones"
                     Start-Sleep -Milliseconds $SleepTime 
                 }
 
                 # Start new jobs 
                 $i++
-                $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $ComputerName -Name $ComputerName -OutVariable LastJob
-                Write-Progress -Id 1 -Activity 'Starting jobs' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $Computers.Count * 100)
+                $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $Computer -Name $Computer -OutVariable LastJob
+                Write-Progress -Id 1 -Activity 'Starting jobs' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $ComputerName.Count * 100)
                 Write-Verbose "Job with id: $($LastJob.Id) just started."
             }
 
@@ -115,7 +116,7 @@ function Start-Multithread
                     $JobsStillRunning += "$($RunningJob.Name) "
                 }
 
-                Write-Progress -Id 1 -Activity 'Waiting for jobs to finish' -Status "$JobsStillRunning"  -PercentComplete (($Computers.Count - (Get-Job -State Running).Count) / $Computers.Count * 100)
+                Write-Progress -Id 1 -Activity 'Waiting for jobs to finish' -Status "$JobsStillRunning"  -PercentComplete (($ComputerName.Count - (Get-Job -State Running).Count) / $ComputerName.Count * 100)
                 Write-Verbose "Waiting for following $((Get-Job -State Running).count) jobs to stop $JobsStillRunning"
                 Start-Sleep -Milliseconds $SleepTime
             }
