@@ -4,7 +4,7 @@
 .DESCRIPTION
    Module for multi threading using jobs 
 .EXAMPLE
-PS C:\> Start-MultiThred -Script { param($ComputerName) Test-Connection $ComputerName -Count 1} -Computers ::1,localhost,::1
+PS C:\> Start-MultiThred -Script { param($ComputerName) Test-Connection $ComputerName -Count 1} -ComputerName ::1,localhost,::1
 
 Source        Destination     IPV4Address      IPV6Address                              Bytes    Time(ms) 
 ------        -----------     -----------      -----------                              -----    -------- 
