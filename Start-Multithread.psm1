@@ -49,8 +49,7 @@ function Start-Multithread
         [Parameter(Mandatory=$true, 
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true, 
-                   Position=1,
-                   Alias='Computers')]
+                   Position=1)]
         [String[]]
         $ComputerName,
 
@@ -94,7 +93,7 @@ function Start-Multithread
                 # Wait for running jobs to finnish if MaxThreads is reached
                 While((Get-Job -State Running).count -ge $MaxThreads) {
                     Write-Progress -Id 1 -Activity 'Waiting for existing jobs to complete' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $ComputerName.Count * 100)
-                    Write-Verbose "Waiting for jobs to finish before starting new ones"
+                    Write-Verbose 'Waiting for jobs to finish before starting new ones'
                     Start-Sleep -Milliseconds $SleepTime 
                 }
 
@@ -122,7 +121,7 @@ function Start-Multithread
             }
 
             # Output
-            Write-Verbose "Recieving jobs"
+            Write-Verbose 'Recieving jobs'
             Get-job | Receive-Job 
 
             # Cleanup 
