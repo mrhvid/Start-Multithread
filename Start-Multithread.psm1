@@ -99,7 +99,7 @@ function Start-Multithread
 
                 # Start new jobs 
                 $i++
-                $Jobs += Start-Job -ScriptBlock {$Script} -ArgumentList $Computer -Name $Computer -OutVariable LastJob
+                $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $Computer -Name $Computer -OutVariable LastJob
                 Write-Progress -Id 1 -Activity 'Starting jobs' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $ComputerName.Count * 100)
                 Write-Verbose "Job with id: $($LastJob.Id) just started."
             }
