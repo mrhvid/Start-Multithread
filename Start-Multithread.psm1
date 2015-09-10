@@ -89,11 +89,11 @@ function Start-Multithread
             $i = 0
             $Jobs = @()
             Foreach($Computer in $ComputerName) {
-                Write-Verbose "Processing $Computer"
+                Write-Verbose -Message "Processing $Computer"
                 # Wait for running jobs to finnish if MaxThreads is reached
                 While((Get-Job -State Running).count -ge $MaxThreads) {
                     Write-Progress -Id 1 -Activity 'Waiting for existing jobs to complete' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $ComputerName.Count * 100)
-                    Write-Verbose 'Waiting for jobs to finish before starting new ones'
+                    Write-Verbose -Message 'Waiting for jobs to finish before starting new ones'
                     Start-Sleep -Milliseconds $SleepTime 
                 }
 
@@ -101,11 +101,11 @@ function Start-Multithread
                 $i++
                 $Jobs += Start-Job -ScriptBlock $Script -ArgumentList $Computer -Name $Computer -OutVariable LastJob
                 Write-Progress -Id 1 -Activity 'Starting jobs' -Status "$($(Get-job -State Running).count) jobs running" -PercentComplete ($i / $ComputerName.Count * 100)
-                Write-Verbose "Job with id: $($LastJob.Id) just started."
+                Write-Verbose -Message "Job with id: $($LastJob.Id) just started."
             }
 
             # All jobs have now been started
-            Write-Verbose "All jobs have been started $(Get-Date)"
+            Write-Verbose -Message "All jobs have been started $(Get-Date)"
             
             # Wait for jobs to finish
             While((Get-Job -State Running).count -gt 0) {
@@ -116,12 +116,12 @@ function Start-Multithread
                 }
 
                 Write-Progress -Id 1 -Activity 'Waiting for jobs to finish' -Status "$JobsStillRunning"  -PercentComplete (($ComputerName.Count - (Get-Job -State Running).Count) / $ComputerName.Count * 100)
-                Write-Verbose "Waiting for following $((Get-Job -State Running).count) jobs to stop $JobsStillRunning"
+                Write-Verbose -Message "Waiting for following $((Get-Job -State Running).count) jobs to stop $JobsStillRunning"
                 Start-Sleep -Milliseconds $SleepTime
             }
 
             # Output
-            Write-Verbose 'Recieving jobs'
+            Write-Verbose -Message 'Recieving jobs'
             Get-job | Receive-Job 
 
             # Cleanup 
